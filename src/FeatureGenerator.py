@@ -7,18 +7,30 @@ from AnnotationUnit import *
 import GraphUtils
 import ConTreeUtils
 
-# numerical normalization
-#NN = lambda x: x
+# numerical normalization 
 NN = lambda x: re.sub("\d", "1", x)
+# unicode to ascii conversion
+UA = lambda x: x.encode('ascii','ignore')
+# feature to string
+def FS(feature):
+    if type(feature) == type('s') or type(feature) == type(unicode('s')): 
+        return NN(UA(feature))
+    else:
+        newFeature = list(feature)
+        for i in range(len(feature)):
+            newFeature[i] = FS(feature[i])
+        return newFeature
+        
  
 ######################
 # Feature Generators #
 ######################
 #	- base feature constructors
 def ValueFeature(featureName, feature):
-	return dict([(featureName, NN(feature))])
+	return dict([(featureName, NN(UA(feature)))])
 def BagOfFeatures(featureName, featureList):
-	return dict([('contain-%s(%s)' % (featureName, NN(unicode(feature))), True) for feature in featureList])
+	#return dict([('contain-%s%s' % (featureName, NN(unicode(feature))), True) for feature in featureList])
+	return dict([('contain-%s%s' % (featureName, str(FS(feature))), True) for feature in featureList])
 
 def Ngram(n, items):
 	ngrams = list()
